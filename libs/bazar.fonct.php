@@ -928,7 +928,7 @@ function baz_formulaire($mode, $url = '', $valeurs = '') {
 	//------------------------------------------------------------------------------------------------
 	if ($mode == BAZ_ACTION_MODIFIER_V && $_POST['antispam']==1) {
 		if ($formtemplate->validate() && baz_a_le_droit( 'saisie_fiche', $GLOBALS['wiki']->GetPageOwner($GLOBALS['_BAZAR_']['id_fiche']))) {
-			$formtemplate->process('baz_mise_a_jour_fiche', false) ;
+			baz_mise_a_jour_fiche($_POST) ;
 			// Redirection vers mes_fiches pour eviter la revalidation du formulaire
 			$GLOBALS['_BAZAR_']['url']->addQueryString ('message', 'modif_ok') ;
 			$GLOBALS['_BAZAR_']['url']->addQueryString(BAZ_VARIABLE_VOIR, BAZ_VOIR_CONSULTER);
@@ -1050,7 +1050,6 @@ function baz_requete_bazar_fiche($valeur) {
 		$tab = $tableau[$i][0]($formtemplate, $tableau[$i], 'requete', $valeur);
 		if (is_array($tab)) $valeur = array_merge($valeur, $tab);
 	}
-	
 	$valeur['date_maj_fiche'] = date( 'Y-m-d H:i:s', time() );
 	
 	//pour une insertion d'une nouvelle fiche, on génére l'id de la fiche
@@ -1164,6 +1163,7 @@ function baz_insertion_fiche($valeur) {
 */
 function baz_mise_a_jour_fiche($valeur) {
 	$valeur = array_merge(baz_valeurs_fiche($GLOBALS['_BAZAR_']['id_fiche']), $valeur);
+	//$valeur = array_intersect($valeur, baz_valeurs_fiche($GLOBALS['_BAZAR_']['id_fiche']));
 	$valeur = baz_requete_bazar_fiche($valeur, $GLOBALS['_BAZAR_']['id_typeannonce']);
 	//on sauve les valeurs d'une fiche dans une PageWiki, pour garder l'historique
 	$GLOBALS["wiki"]->SavePage($GLOBALS['_BAZAR_']['id_fiche'], $valeur);
@@ -2356,7 +2356,7 @@ function baz_rechercher($typeannonce = 'toutes', $categorienature = 'toutes') {
 		}
 	}
 	
-	if ( $nb_type_de_fiches>1 || (($GLOBALS['_BAZAR_']['choix_categorie'] == 1) && $nb_type_de_fiches>1 ) ) {
+	if ( $nb_type_de_fiches>1 || ($GLOBALS['_BAZAR_']['choix_categorie'] == 1) ) {
 	  $option=array('onchange' => 'javascript:this.form.submit();');
 	  $formtemplate->addElement ('select', 'id_typeannonce', BAZ_TYPE_FICHE, $type_formulaire_select, $option) ;
 	  if (isset($_REQUEST['id_typeannonce'])) {
@@ -2364,32 +2364,11 @@ function baz_rechercher($typeannonce = 'toutes', $categorienature = 'toutes') {
 		  $formtemplate->setDefaults($defauts);
 	  }
 	}
-	
-	if ($nb_type_de_fiches==1) {
-		$keys = array_keys($tab_formulaires);
-		$keysform = array_keys($tab_formulaires[$keys[0]]);
-		$tab_nature = $tab_formulaires[$keys[0]][$keysform[0]];
-		$_REQUEST['id_typeannonce']=$tab_nature['bn_id_typeannonce'];
-		$GLOBALS['_BAZAR_']['typeannonce']=$tab_nature['bn_id_typeannonce'];
-		$GLOBALS['_BAZAR_']['typeannonce']=$tab_nature['bn_label_nature'];
-		$GLOBALS['_BAZAR_']['condition']=$tab_nature['bn_condition'];
-		$GLOBALS['_BAZAR_']['template']=$tab_nature['bn_template'];
-		$GLOBALS['_BAZAR_']['commentaire']=$tab_nature['bn_commentaire'];
-		$GLOBALS['_BAZAR_']['appropriation']=$tab_nature['bn_appropriation'];
-		$GLOBALS['_BAZAR_']['class']=$tab_nature['bn_label_class'];
-		$res = '<h2 class="titre_consulter">'.BAZ_RECHERCHER_2POINTS.' '.$GLOBALS['_BAZAR_']['typeannonce'].'</h2>'."\n";
 
-		$tableau = formulaire_valeurs_template_champs($GLOBALS['_BAZAR_']['template']) ;
-		for ($i=0; $i<count($tableau); $i++) {
-			if (($tableau[$i][0] == 'liste' || $tableau[$i][0] == 'checkbox' ||$tableau[$i][0] == 'listefiche' || $tableau[$i][0] == 'checkboxfiche' || $tableau[$i][0] == 'labelhtml')) {
-				$tableau[$i][0]($formtemplate, $tableau[$i], 'formulaire_recherche', '') ;
-			}
-		}
-	}
 	// Ajout des options si un type de fiche a ete choisie
-	elseif ( (isset($_REQUEST['id_typeannonce']) && $_REQUEST['id_typeannonce'] != 'toutes' && $_REQUEST['id_typeannonce'] != '') ) {
-		$requete_sql =  'SELECT * FROM `'.BAZ_PREFIXE.'nature`';
-		if (isset($_REQUEST['id_typeannonce']) && $_REQUEST['id_typeannonce'] != '') ' WHERE bn_id_nature='.$_REQUEST['id_typeannonce'] ;
+	if ( (isset($_REQUEST['id_typeannonce']) && $_REQUEST['id_typeannonce'] != 'toutes' && $_REQUEST['id_typeannonce'] != '') || ($nb_type_de_fiches==1) ) {
+
+		$requete_sql =  'SELECT * FROM `'.BAZ_PREFIXE.'nature` WHERE bn_id_nature='.$_REQUEST['id_typeannonce'] ;
 		$nomwikiformulaire = $GLOBALS['wiki']->LoadAll($requete_sql);
 		$tab_nature = $nomwikiformulaire[0];
 		$GLOBALS['_BAZAR_']['typeannonce']=$tab_nature['bn_label_nature'];
