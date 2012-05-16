@@ -46,7 +46,7 @@ define ('BAZ_INTRO_MODIFIER_FORMULAIRE', 'Pour &eacute;diter un formulaire, cliq
 define ('BAZ_INTRO_MODIFIER_LISTE',  'Pour &eacute;diter une liste, cliquez sur son nom ou sur l\'icone avec le crayon.<br />Pour supprimer une liste, cliquez sur l\'icone de la corbeille.<br /> Pour cr&eacute;er une nouvelle liste, cliquez sur le lien avec un signe plus en bas de page.');
 define ('BAZ_CONFIRM_SUPPRIMER_FORMULAIRE', 'Attention! Toutes les donn&eacute;es enregistr&eacute;es seront perdues.. Etes-vous s&ucirc;rs de vouloir supprimer ce type de formulaire et toutes ses fiches associ&eacute;es');
 define ('BAZ_CONFIRM_SUPPRIMER_LISTE', 'Attention! Toutes les donn&eacute;es enregistr&eacute;es seront perdues.. Etes-vous s&ucirc;rs de vouloir supprimer cette liste et toutes ses donn&eacute;es associ&eacute;es');
-define ('BAZ_NOUVEAU_FORMULAIRE', 'Saisir un nouveau formulaire');
+define ('BAZ_NOUVEAU_FORMULAIRE', 'Saisir un nouveau type de questionnaire');
 define ('BAZ_NOUVELLE_LISTE', 'Saisir une nouvelle liste');
 define ('BAZ_FORMULAIRE_ET_FICHES_SUPPRIMES', 'Le type de formulaire et ses fiches associ&eacute;es ont bien &eacute;t&eacute; supprim&eacute;s.');
 define ('BAZ_LISTES_SUPPRIMEES', 'La liste &agrave; bien &eacute;t&eacute; supprim&eacute;e.');

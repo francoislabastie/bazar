@@ -72,13 +72,13 @@ function afficher_image($nom_image, $label, $class, $largeur_vignette, $hauteur_
 			}
 			//on renvoit l'image en vignette, avec quand on clique, l'image redimensionnee
 			$url_base = str_replace('wakka.php?wiki=','',$GLOBALS['wiki']->config['base_url']);
-			return  '<a class="triggerimage'.' '.$class.'" rel="#overlay_bazar" title="'.$label.'" href="'.$url_base.'cache/image_'.$nom_image.'">'."\n".
+			return  '<a class="triggerimage'.' '.$class.'" rel="#overlay-link" href="'.$url_base.'cache/image_'.$nom_image.'">'."\n".
 					'<img alt="'.$nom_image.'"'.' src="'.$url_base.'cache/vignette_'.$nom_image.'" width="'.$width.'" height="'.$height.'" rel="'.$url_base.'cache/image_'.$nom_image.'" />'."\n".
 					'</a>'."\n";
 		}
 		else {
 			//on renvoit l'image en vignette, avec quand on clique, l'image originale
-			return  '<a class="triggerimage'.' '.$class.'" rel="#overlay_bazar" title="'.$label.'" href="'.$url_base.BAZ_CHEMIN_UPLOAD.$nom_image.'">'."\n".
+			return  '<a class="triggerimage'.' '.$class.'" rel="#overlay-link" href="'.$url_base.BAZ_CHEMIN_UPLOAD.$nom_image.'">'."\n".
 					'<img alt="'.$nom_image.'"'.' src="'.$url_base.'cache/vignette_'.$nom_image.'" width="'.$width.'" height="'.$height.'" rel="'.$url_base.'cache/image_'.$nom_image.'" />'."\n".
 					'</a>'."\n";
 		}
@@ -143,6 +143,9 @@ function formulaire_valeurs_template_champs($template) {
 	}
 	return $tableau_template;
 }
+
+//-------------------FONCTIONS DE MISE EN PAGE DES FORMULAIRES
+
 
 //-------------------FONCTIONS DE MISE EN PAGE DES FORMULAIRES
 
@@ -233,6 +236,8 @@ function radio(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 		return $html;
 	}
 }
+
+
 
 
 /** liste() - Ajoute un Ã©lÃ©ment de type liste dÃ©roulante au formulaire
@@ -423,21 +428,21 @@ function checkbox(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 			$i++;
 		}	
 		$squelette_checkbox =& $formtemplate->defaultRenderer();
-		$classrequired='';
-		if (isset($tableau_template[8]) && $tableau_template[8]==1) {$classrequired .= ' chk_required';}
-		$squelette_checkbox->setElementTemplate( '<fieldset class="bazar_fieldset'.$classrequired.'">'."\n".'<legend>{label}'.
-												'<!-- BEGIN required --><span class="symbole_obligatoire">&nbsp;*</span><!-- END required -->'."\n".
+		$classrequired=''; $req = '';
+		if (isset($tableau_template[8]) && $tableau_template[8]==1) {
+			$classrequired .= ' chk_required';
+			$req = '<span class="symbole_obligatoire">&nbsp;*</span>';
+		}
+		$squelette_checkbox->setElementTemplate( '<fieldset class="bazar_fieldset'.$classrequired.'">'."\n".'<legend>'.$req.' {label}'."\n".
 												'</legend>'."\n".'{element}'."\n".'</fieldset> '."\n"."\n", $tableau_template[0].$tableau_template[1].$tableau_template[6]);
 		$squelette_checkbox->setGroupElementTemplate( "\n".'<div class="bazar_checkbox">'."\n".'{element}'."\n".'</div>'."\n", $tableau_template[0].$tableau_template[1].$tableau_template[6]);
 		$formtemplate->addGroup($checkbox, $tableau_template[0].$tableau_template[1].$tableau_template[6], $tableau_template[2].$bulledaide, "\n");
-		if (isset($tableau_template[8]) && $tableau_template[8]==1) {
-			/*$formtemplate->addGroupRule($tableau_template[0].$tableau_template[1].$tableau_template[6], $tableau_template[2].' obligatoire', 'required', null, 1, 'client');*/
-		}
 
 		$formtemplate->setDefaults($defaultValues);
 	}
 	elseif ( $mode == 'requete' )
 	{
+		return array($tableau_template[0].$tableau_template[1].$tableau_template[6] => $valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]]);
 	}
 	elseif ($mode == 'formulaire_recherche')
 	{
@@ -1304,27 +1309,24 @@ function image(&$formtemplate, $tableau_template, $mode, $valeurs_fiche) {
 		$labelbulle = '';
 		if ($bulle_d_aide!='') $labelbulle .= $label.' <img class="tooltip_aide" title="'.htmlentities($bulle_d_aide).'" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
 		
-		//cas ou il y a une image dans la base de donnÃ©es
+		//cas ou il y a une image dans la base de donnees
 		if (isset($valeurs_fiche[$type.$identifiant]) && $valeurs_fiche[$type.$identifiant] != '') {			
 			
 			//il y a bien le fichier image, on affiche l'image, avec possibilite de la supprimer ou de la modifier
 			if (file_exists(BAZ_CHEMIN_UPLOAD.$valeurs_fiche[$type.$identifiant])) {
 				
 				require_once BAZ_CHEMIN.'libs'.DIRECTORY_SEPARATOR.'HTML/QuickForm/html.php';
-				$formtemplate->addElement(new HTML_QuickForm_html("\n".'<fieldset class="bazar_fieldset">'."\n".'<legend>'.$labelbulle.'</legend>'."\n")) ;
+				$formtemplate->addElement(new HTML_QuickForm_html("\n".'<fieldset class="bazar_fieldset">'."\n".'<legend>'.$label.'</legend>'."\n")) ;
 				
 				$lien_supprimer = $GLOBALS['wiki']->href( 'edit', $GLOBALS['wiki']->GetPageTag() );
 				$lien_supprimer .= '&suppr_image='.$valeurs_fiche[$type.$identifiant];
 				
-				$html_image = afficher_image($valeurs_fiche[$type.$identifiant], $label, $class, $largeur_vignette, $hauteur_vignette, $largeur_image, $hauteur_image);
+				$html_image = afficher_image($valeurs_fiche[$type.$identifiant], $label, '', $largeur_vignette, $hauteur_vignette, $largeur_image, $hauteur_image);
 				$lien_supprimer_image = '<a class="BAZ_lien_supprimer lien_texte" href="'.str_replace('&', '&amp;', $lien_supprimer).'" onclick="javascript:return confirm(\''.
 				BAZ_CONFIRMATION_SUPPRESSION_IMAGE.'\');" >'.BAZ_SUPPRIMER_IMAGE.'</a>'."\n";
 				if ($html_image!='') $formtemplate->addElement('html', $html_image) ;
 				//gestion du champs obligatoire
 				$option = '';
-				if (isset($obligatoire) && $obligatoire==1) {
-					$option = array('required' =>'required') ;
-				}
 				$formtemplate->addElement('file', $type.$identifiant, $lien_supprimer_image.BAZ_MODIFIER_IMAGE, $option) ;
 				$formtemplate->addElement(new HTML_QuickForm_html("\n".'</fieldset>'."\n")) ;
 			}
@@ -1751,56 +1753,77 @@ function carte_google(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 
 }
 
-/** listefiche() - Ajoute un Ã©lÃ©ment de type liste dÃ©roulante correspondant Ã  un autre type de fiche au formulaire
+/** listefiche() - Ajoute un element de type liste deroulante correspondant a un autre type de fiche au formulaire
 *
 * @param    mixed   L'objet QuickForm du formulaire
-* @param    mixed   Le tableau des valeurs des diffÃ©rentes option pour l'Ã©lÃ©ment liste
-* @param    string  Type d'action pour le formulaire : saisie, modification, vue,... saisie par dÃ©faut
+* @param    mixed   Le tableau des valeurs des diffÃ©rentes option pour l'element liste
+* @param    string  Type d'action pour le formulaire : saisie, modification, vue,... saisie par defaut
 * @return   void
 */
 function listefiche(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 {
 	if ($mode=='saisie') {
 		$bulledaide = '';
-		if (isset($tableau_template[10]) && $tableau_template[10]!='') $bulledaide = ' <img class="tooltip_aide" title="'.htmlentities($tableau_template[10]).'" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
-		$val_type = baz_valeurs_type_de_fiche($tableau_template[1]);
-		$tab_result = baz_requete_recherche_fiches('', 'alphabetique', $tableau_template[1], $val_type["bn_type_fiche"]);
-		$select[0] = BAZ_CHOISIR;
-		foreach ($tab_result as $fiche) {
-			$valeurs_fiche = json_decode($fiche[0], true);
-			$valeurs_fiche = array_map('utf8_decode', $valeurs_fiche);
-			$select[$valeurs_fiche['id_fiche']] = $valeurs_fiche['bf_titre'] ;
+		if (isset($tableau_template[10]) && $tableau_template[10]!='') {
+			$bulledaide = ' <img class="tooltip_aide" title="'.htmlentities($tableau_template[10]).'" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
 		}
-
-		$option = array('id' => $tableau_template[0].$tableau_template[1].$tableau_template[6], 'class' => 'bazar-select');
+			
+		$select_html = '<div class="formulaire_ligne">'."\n".'<div class="formulaire_label">'."\n";
+		if (isset($tableau_template[8]) && $tableau_template[8]==1) {
+			$select_html .= '<span class="symbole_obligatoire">*&nbsp;</span>'."\n";
+		}
+		$select_html .= $tableau_template[2].$bulledaide.' : </div>'."\n".'<div class="formulaire_input">'."\n".'<select';		
+		
+		$select_attributes = '';
+		
+		if ($tableau_template[4] != '' && $tableau_template[4] > 1) {
+			$select_attributes .= ' multiple="multiple" size="'.$tableau_template[4].'"';
+			$selectnametab = '[]';
+		} else {
+			$selectnametab = '';
+		}
+		
+		$select_attributes .= ' class="bazar-select" id="'.$tableau_template[0].$tableau_template[1].$tableau_template[6].'" name="'.$tableau_template[0].$tableau_template[1].$tableau_template[6].$selectnametab.'"';
+				
+		
+		if (isset($tableau_template[8]) && $tableau_template[8]==1) {
+			$select_attributes .= ' required="required"';
+		}
+		$select_html .= $select_attributes.'>'."\n";
+		
 		if (isset($valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]]) && $valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]]!='')
 		{
-			$def = $valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]];
+			$def =	$valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]];
 		}
 		else
 		{
 			$def = $tableau_template[5];
 		}
-
-		require_once 'HTML/QuickForm/select.php';
-		$label = $tableau_template[2].$bulledaide;
-		$symb = '';
-		if (isset($tableau_template[8]) && $tableau_template[8]==1 && count($tab_result)>0)
-		{
-			$option['required'] = 'required';
-			$symb .= '<span class="symbole_obligatoire">*&nbsp;</span>';
+		
+		/*$valliste = baz_valeurs_liste($tableau_template[1]);*/
+		if ($def=='' && ($tableau_template[4] == '' || $tableau_template[4] <= 1 ) || $def==0) {
+			$select_html .= '<option value="0" selected="selected">'.BAZ_CHOISIR.'</option>'."\n"; 
+		} 
+		$val_type = baz_valeurs_type_de_fiche($tableau_template[1]);
+		$tab_result = baz_requete_recherche_fiches('', 'alphabetique', $tableau_template[1], $val_type["bn_type_fiche"]);
+		$select = '';
+		foreach ($tab_result as $fiche) {
+			$valeurs_fiche_liste = json_decode($fiche[0], true);
+			$valeurs_fiche_liste = array_map('utf8_decode', $valeurs_fiche_liste);
+			$select[$valeurs_fiche_liste['id_fiche']] = $valeurs_fiche_liste['bf_titre'] ;
 		}
-		$select= new HTML_QuickForm_select($tableau_template[0].$tableau_template[1].$tableau_template[6], $symb.$label, $select, $option);
-		if ($tableau_template[4] != '') $select->setSize($tableau_template[4]);
-		$select->setMultiple(0);
-		$select->setValue($def);
-		//echo 'valeur : '.$valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]];
-		$formtemplate->addElement($select) ;
+		if (is_array($select)) {
+			foreach ($select as $key => $label) {
+				$select_html .= '<option value="'.$key.'"';
+				if ($def != '' && strstr($key, $def)) $select_html .= ' selected="selected"';
+				$select_html .= '>'.$label.'</option>'."\n";
+			}
 
-		if (isset($tableau_template[8]) && $tableau_template[8]==1 && count($tab_result)>0)
-		{
-			/*$formtemplate->addRule($tableau_template[0].$tableau_template[1].$tableau_template[6], $tableau_template[2].' obligatoire', 'required', '', 'client') ;*/
 		}
+		
+		$select_html .= "</select>\n</div>\n</div>\n";
+		
+		$formtemplate->addElement('html', $select_html) ;
 	}
 	elseif ($mode == 'requete')
 	{
@@ -1842,7 +1865,7 @@ function listefiche(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 				$html .= '<span class="BAZ_texte BAZ_texte_'.$GLOBALS['_BAZAR_']['class'].' '.$tableau_template[2].'_description">';
 				$val_fiche = baz_valeurs_fiche($valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]]);
 				$html .= '<a href="'.str_replace('&', '&amp;', $GLOBALS['wiki']->href('', $valeurs_fiche[$tableau_template[0].$tableau_template[1].$tableau_template[6]])).'" class="voir_fiche ouvrir_overlay" title="Voir la fiche '.
-						$val_fiche['bf_titre'].'" rel="#overlay">'.
+						$val_fiche['bf_titre'].'" rel="#overlay-link">'.
 						$val_fiche['bf_titre'].'</a></span>'."\n".
 						'</div>'."\n";
 				
@@ -1900,7 +1923,7 @@ function checkboxfiche(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 				$url_checkboxfiche->addQueryString(BAZ_VARIABLE_ACTION, BAZ_VOIR_FICHE);
 				$url_checkboxfiche->addQueryString('id_fiche', $ligne[0] );
 				$url_checkboxfiche->addQueryString('wiki', $_GET['wiki'].'/iframe');
-				$checkbox[$i]= & HTML_QuickForm::createElement('checkbox', $ligne[0], $tab_chkbox, '<a class="voir_fiche ouvrir_overlay" rel="#overlay" href="'.str_replace('&','&amp;',$url_checkboxfiche->getURL()).'">'.$ligne[1].'</a>', $optioncheckbox) ;
+				$checkbox[$i]= & HTML_QuickForm::createElement('checkbox', $ligne[0], $tab_chkbox, '<a class="voir_fiche ouvrir_overlay" rel="#overlay-link" href="'.str_replace('&','&amp;',$url_checkboxfiche->getURL()).'">'.$ligne[1].'</a>', $optioncheckbox) ;
 				$url_checkboxfiche->removeQueryString(BAZ_VARIABLE_VOIR);
 				$url_checkboxfiche->removeQueryString(BAZ_VARIABLE_ACTION);
 				$url_checkboxfiche->removeQueryString('id_fiche');
@@ -1927,7 +1950,7 @@ function checkboxfiche(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 			$url_checkboxfiche->addQueryString('wiki', $_GET['wiki'].'/iframe');
 			$url_checkboxfiche->addQueryString('id_typeannonce', $tableau_template[1]);
 			$url_checkboxfiche->addQueryString('ce_fiche_liee', $_GET['id_fiche']);	
-			$html .= '<a class="ajout_fiche ouvrir_overlay" href="'.str_replace('&', '&amp;', $url_checkboxfiche->getUrl()).'" rel="#overlay" title="'.htmlentities($tableau_template[2]).'">'.$tableau_template[2].'</a>'."\n";
+			$html .= '<a class="ajout_fiche ouvrir_overlay" href="'.str_replace('&', '&amp;', $url_checkboxfiche->getUrl()).'" rel="#overlay-link" title="'.htmlentities($tableau_template[2]).'">'.$tableau_template[2].'</a>'."\n";
 			$formtemplate->addElement('html', $html);
 		} else {
 			$formtemplate->addElement('html', '<div class="info_box">'.$tableau_template[3].'</div>');
@@ -2012,7 +2035,7 @@ function checkboxfiche(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 				$url_checkboxfiche->addQueryString(BAZ_VARIABLE_ACTION, BAZ_VOIR_FICHE);
 				$url_checkboxfiche->addQueryString('id_fiche', $ligne[0] );
 				$url_checkboxfiche->addQueryString('wiki', $_GET['wiki'].'/iframe');
-				$checkbox[$i]= '<a class="voir_fiche ouvrir_overlay" rel="#overlay" href="'.str_replace('&','&amp;',$url_checkboxfiche->getURL()).'">'.$ligne[1].'</a>';
+				$checkbox[$i]= '<a class="voir_fiche ouvrir_overlay" rel="#overlay-link" href="'.str_replace('&','&amp;',$url_checkboxfiche->getURL()).'">'.$ligne[1].'</a>';
 				$url_checkboxfiche->removeQueryString(BAZ_VARIABLE_VOIR);
 				$url_checkboxfiche->removeQueryString(BAZ_VARIABLE_ACTION);
 				$url_checkboxfiche->removeQueryString('id_fiche');
@@ -2079,7 +2102,7 @@ function listefiches(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 		$url_checkboxfiche->addQueryString('wiki', $_GET['wiki'].'/iframe');
 		$url_checkboxfiche->addQueryString('id_typeannonce', $tableau_template[1]);
 		$url_checkboxfiche->addQueryString('ce_fiche_liee', $_GET['id_fiche']);	
-		$html .= '<a class="ajout_fiche ouvrir_overlay" href="'.str_replace('&', '&amp;', $url_checkboxfiche->getUrl()).'" rel="#overlay" title="'.htmlentities($tableau_template[4]).'">'.$tableau_template[4].'</a>'."\n";
+		$html .= '<a class="ajout_fiche ouvrir_overlay" href="'.str_replace('&', '&amp;', $url_checkboxfiche->getUrl()).'" rel="#overlay-link" title="'.htmlentities($tableau_template[4]).'">'.$tableau_template[4].'</a>'."\n";
 		$formtemplate->addElement('html', $html);
 	}
 	elseif ( $mode == 'requete' )

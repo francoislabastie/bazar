@@ -411,13 +411,11 @@ cursor:default;
 }
 
 fieldset.tab {
-display:none;
 clear:left;
 border:1px solid #666;
 min-height:150px;
 margin:0;
 padding:15px 20px;
-
 }
 
 .tooltip_aide img {
@@ -1102,3 +1100,12 @@ left:3px;
 }
 
 .lien_texte {padding:2px 0 2px 20px;}
+
+.invalid {
+  border-color: #e88;
+  -webkit-box-shadow: 0 0 5px rgba(255, 0, 0, .8);
+  -moz-box-shadow: 0 0 5px rbba(255, 0, 0, .8);
+  -o-box-shadow: 0 0 5px rbba(255, 0, 0, .8);
+  -ms-box-shadow: 0 0 5px rbba(255, 0, 0, .8);
+  box-shadow:0 0 5px rgba(255, 0, 0, .8);
+}
