@@ -46,6 +46,7 @@ if (!defined("WIKINI_VERSION"))
 // |                                            ENTETE du PROGRAMME                                       |
 // +------------------------------------------------------------------------------------------------------+
 
+// modif test 16/05/12 13:54 francois labastie
 
 //error_reporting(E_ALL & ~E_DEPRECATED);
 
